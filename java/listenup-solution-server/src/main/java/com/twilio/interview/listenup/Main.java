@@ -1,16 +1,20 @@
 package com.twilio.interview.listenup;
 
-import static spark.Spark.get;
-import static spark.Spark.port;
-
 public class Main {
-
-    public static void main(String[] args) {
-        /* See Spark documentation at http://sparkjava.com/documentation.html */
-        port(8005);
-        get("/hello/:name", (request, response) -> {
-            return "Hello " + request.params("name")+ "!";
-        });
-    }
+  // public static void getRequest(String url) throws ClientProtocolException, IOException {
+  //     CloseableHttpClient httpclient = HttpClients.createDefault();
+  //     HttpGet httpGet = new HttpGet(url);
+  //     CloseableHttpResponse response1 = httpclient.execute(httpGet);
+  //     try {
+  //       HttpEntity entity1 = response1.getEntity();
+  //       System.out.println(EntityUtils.toString(entity1));
+  //       EntityUtils.consume(entity1);
+  //     } finally {
+  //       response1.close();
+  //     }
+  //   }
+  public static void main(String[] args) {
+    new UserController(new UserService());
+  }
 
 }
