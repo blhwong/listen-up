@@ -3,6 +3,7 @@ package com.twilio.interview.listenup;
 import static org.junit.Assert.*;
 
 import java.util.ArrayList;
+import java.util.Arrays;
 
 import org.junit.AfterClass;
 import org.junit.BeforeClass;
@@ -25,12 +26,9 @@ public class UserServiceTest {
 
   @Test
   public void canFilterDuplicates() {
-    ArrayList<String> list = new ArrayList<String>();
-    list.add("ABC");
-    list.add("ABC");
-    list.add("DEF");
-    list.add("DEF");
-    list.add("HIJ");
+    ArrayList<String> list = new ArrayList<String>(
+      Arrays.asList("ABC", "ABC", "DEF", "DEF", "HIJ")
+    );
     int count = service.filterDuplicates(list);
     assertEquals(count, 3);
     list.clear();
@@ -41,11 +39,9 @@ public class UserServiceTest {
   @Test
   public void canHandlePlaysService() {
     String username = "brandon_wong";
-    ArrayList<String> plays = new ArrayList<String>();
-    plays.add("song1");
-    plays.add("song1");
-    plays.add("song1");
-    plays.add("song2");
+    ArrayList<String> plays = new ArrayList<String>(
+      Arrays.asList("song1", "song1", "song1", "song2")
+    );
     service.handlePlaysService(username, plays);
     User u = service.getUser(username);
     assertEquals(u.username, username);
@@ -75,12 +71,9 @@ public class UserServiceTest {
   public void canGetUserDetailIfPopulated() {
     String username = "populated_user";
     int friendsCount = 15;
-    ArrayList<String> plays = new ArrayList<String>();
-    plays.add("song1");
-    plays.add("song1");
-    plays.add("song1");
-    plays.add("song2");
-    plays.add("song3");
+    ArrayList<String> plays = new ArrayList<String>(
+      Arrays.asList("song1", "song1", "song1", "song2", "song3")
+    );
     service.handleFriendsService(username, friendsCount);
     service.handlePlaysService(username, plays);
 
