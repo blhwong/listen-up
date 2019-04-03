@@ -23,7 +23,7 @@ public class UserService {
   private final String playsURLPrefix = "http://localhost:8001";
   private Map<String, User> users = new HashMap<>();
 
-  private static String getJsonResponse(String url) throws ClientProtocolException, IOException {
+  private String getJsonResponse(String url) throws ClientProtocolException, IOException {
     CloseableHttpClient httpclient = HttpClients.createDefault();
     HttpGet httpGet = new HttpGet(url);
     CloseableHttpResponse response1 = httpclient.execute(httpGet);
@@ -36,26 +36,26 @@ public class UserService {
     }
   }
 
-  private static ServiceResponse getServiceRequest(String url) throws ClientProtocolException, IOException {
+  private ServiceResponse getServiceRequest(String url) throws ClientProtocolException, IOException {
     String json = getJsonResponse(url);
     Gson gson = new Gson();
     ServiceResponse response = gson.fromJson(json, ServiceResponse.class);
     return response;
   }
 
-  private static ServiceDetailResponse getServiceDetailRequest(String url) throws ClientProtocolException, IOException {
+  private ServiceDetailResponse getServiceDetailRequest(String url) throws ClientProtocolException, IOException {
     String json = getJsonResponse(url);
     Gson gson = new Gson();
     ServiceDetailResponse response = gson.fromJson(json, ServiceDetailResponse.class);
     return response;
   }
 
-  private static int filterDuplicates(ArrayList<String> list) {
+  public int filterDuplicates(ArrayList<String> list) {
     Set<String> set = new HashSet<>(list);
     return set.size();
   }
 
-  public void insertUser(String username, ArrayList<String> plays, int friends) {
+  private void insertUser(String username, ArrayList<String> plays, int friends) {
     users.put(username, new User(username, plays, friends, "/users/" + username));
   }
 
@@ -63,9 +63,8 @@ public class UserService {
     return users.get(username);
   }
 
-  public void handleFriendsService(String username, ServiceDetailResponse friendsDetail) throws ClientProtocolException, IOException {
+  public void handleFriendsService(String username, int friendsCount) {
     User u = getUser(username);
-    int friendsCount = friendsDetail.data.size();
     if (u == null) {
       insertUser(username, new ArrayList<String>(), friendsCount);
     } else {
@@ -78,16 +77,16 @@ public class UserService {
     for (User i : friendsResponse.users) {
       final String uri = "/friends/" + i.username;
       ServiceDetailResponse friendsDetailResponse = getServiceDetailRequest(friendsURLPrefix + uri);
-      handleFriendsService(i.username, friendsDetailResponse);
+      handleFriendsService(i.username, friendsDetailResponse.data.size());
     }
   }
 
-  public void handlePlaysService(String username, ServiceDetailResponse playsDetail) throws ClientProtocolException, IOException {
+  public void handlePlaysService(String username, ArrayList<String> plays) {
     User u = getUser(username);
     if (u == null) {
-      insertUser(username, playsDetail.data, 0);
+      insertUser(username, plays, 0);
     } else {
-      u.setPlays(playsDetail.data);
+      u.setPlays(plays);
     }
   }
 
@@ -96,7 +95,7 @@ public class UserService {
     for (User i : playsResponse.users) {
       final String uri = "/plays/" + i.username;
       ServiceDetailResponse playsDetailResponse = getServiceDetailRequest(playsURLPrefix + uri);
-      handlePlaysService(i.username, playsDetailResponse);
+      handlePlaysService(i.username, playsDetailResponse.data);
     }
   }
 
@@ -113,8 +112,8 @@ public class UserService {
       final String playsUri = "/plays/" + name;
       ServiceDetailResponse friendsDetailResponse = getServiceDetailRequest(friendsURLPrefix + friendsUri);
       ServiceDetailResponse playsDetailResponse = getServiceDetailRequest(playsURLPrefix + playsUri);
-      handleFriendsService(name, friendsDetailResponse);
-      handlePlaysService(name, playsDetailResponse);
+      handleFriendsService(name, friendsDetailResponse.data.size());
+      handlePlaysService(name, playsDetailResponse.data);
       u = getUser(name);
     }
     ArrayList<String> plays = u.getPlaysData();
