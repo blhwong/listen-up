@@ -19,7 +19,7 @@ public class UserController {
       String name = req.params(":name");
       User user = userService.getUser(name);
       if (user == null) {
-        res.status(400);
+        res.status(404);
         return new ResponseError("No user with name '%s' found", name);
       }
       return user;
