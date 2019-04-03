@@ -43,11 +43,7 @@ public class UserService {
   public List<User> getAllUsers() throws ClientProtocolException, IOException {
     Response friendsResponse = getRequest(friendsURLPrefix + "/friends");
     Response playsResponse = getRequest(playsURLPrefix + "/plays");
-    System.out.println("friendsResponse");
-    System.out.println(friendsResponse.toString());
-    System.out.println("playsResponse");
-    System.out.println(playsResponse.toString());
-    return new ArrayList<>(users.values());
+        return new ArrayList<>(users.values());
   }
 
   public User getUser(String name) {
