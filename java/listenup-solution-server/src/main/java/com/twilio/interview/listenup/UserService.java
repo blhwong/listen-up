@@ -55,29 +55,39 @@ public class UserService {
     return set.size();
   }
 
+  private void handleFriendsService(String username) throws ClientProtocolException, IOException {
+    final String uri = "/friends/" + username;
+    ServiceDetailResponse friendsDetailResponse = getServiceDetailRequest(friendsURLPrefix + uri);
+    User u = users.get(username);
+    if (u == null) {
+      users.put(username, new User(username, new ArrayList<String>(), friendsDetailResponse.data.size(), "/users/" + username));
+    } else {
+      u.setFriends(friendsDetailResponse.data.size());
+    }
+  }
+
   private void getFriendsService() throws ClientProtocolException, IOException {
     ServiceResponse friendsResponse = getServiceRequest(friendsURLPrefix + "/friends");
     for (User i : friendsResponse.users) {
-      ServiceDetailResponse friendsDetailResponse = getServiceDetailRequest(friendsURLPrefix + i.uri);
-      User u = users.get(i.username);
-      if (u == null) {
-        users.put(i.username, new User(i.username, new ArrayList<String>(), friendsDetailResponse.data.size(), "/users/" + i.username));
-      } else {
-        u.setFriends(friendsDetailResponse.data.size());
-      }
+      handleFriendsService(i.username);
+    }
+  }
+
+  private void handlePlaysService(String username) throws ClientProtocolException, IOException {
+    final String uri = "/plays/" + username;
+    ServiceDetailResponse playsDetailResponse = getServiceDetailRequest(playsURLPrefix + uri);
+    User u = users.get(username);
+    if (u == null) {
+      users.put(username, new User(username, playsDetailResponse.data, 0, "/users/" + username));
+    } else {
+      u.setPlays(playsDetailResponse.data);
     }
   }
 
   private void getPlaysService() throws ClientProtocolException, IOException {
     ServiceResponse playsResponse = getServiceRequest(playsURLPrefix + "/plays");
     for (User i : playsResponse.users) {
-      ServiceDetailResponse playsDetailResponse = getServiceDetailRequest(playsURLPrefix + i.uri);
-      User u = users.get(i.username);
-      if (u == null) {
-        users.put(i.username, new User(i.username, playsDetailResponse.data, 0, "/users/" + i.username));
-      } else {
-        u.setPlays(playsDetailResponse.data);
-      }
+      handlePlaysService(i.username);
     }
   }
 
@@ -90,8 +100,8 @@ public class UserService {
   public User getUser(String name) throws ClientProtocolException, IOException {
     User u = users.get(name);
     if (u == null) {
-      getFriendsService();
-      getPlaysService();
+      handleFriendsService(name);
+      handlePlaysService(name);
       u = users.get(name);
     }
     ArrayList<String> plays = u.getPlaysData();
