@@ -3,8 +3,10 @@ package com.twilio.interview.listenup;
 import java.io.IOException;
 import java.util.ArrayList;
 import java.util.HashMap;
+import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
+import java.util.Set;
 
 import com.google.gson.Gson;
 
@@ -24,7 +26,6 @@ public class UserService {
   private Map<String, User> users = new HashMap<>();
 
   private static String getJsonResponse(String url) throws ClientProtocolException, IOException {
-    System.out.println("url " + url);
     CloseableHttpClient httpclient = HttpClients.createDefault();
     HttpGet httpGet = new HttpGet(url);
     CloseableHttpResponse response1 = httpclient.execute(httpGet);
@@ -57,22 +58,19 @@ public class UserService {
     for (User i : playsResponse.users) {
       ServiceDetailResponse playsDetailResponse = getServiceDetailRequest(playsURLPrefix + i.uri);
       User u = users.get(i.username);
+      Set<String> set = new HashSet<>(playsDetailResponse.data);
       if (u == null) {
-        System.out.println("Not found");
-        users.put(i.username, new User(i.username, playsDetailResponse.data.size(), 0, "/users/" + i.username));
+        users.put(i.username, new User(i.username, set.size(), 0, "/users/" + i.username));
       } else {
-        System.out.println("Found");
-        u.setPlays(playsDetailResponse.data.size());
+        u.setPlays(set.size());
       }
     }
     for (User i : friendsResponse.users) {
       ServiceDetailResponse friendsDetailResponse = getServiceDetailRequest(friendsURLPrefix + i.uri);
       User u = users.get(i.username);
       if (u == null) {
-        System.out.println("Not found");
         users.put(i.username, new User(i.username, 0, friendsDetailResponse.data.size(), "/users/" + i.username));
       } else {
-        System.out.println("Found");
         u.setFriends(friendsDetailResponse.data.size());
       }
     }
