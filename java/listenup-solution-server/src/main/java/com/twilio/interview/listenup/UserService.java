@@ -20,11 +20,12 @@ import org.apache.http.util.EntityUtils;
 
 public class UserService {
 
-  private final String friendsURLPrefix = "http://localhost:8000";
-  private final String playsURLPrefix = "http://localhost:8001";
-  private Map<String, User> users = new HashMap<>();
+  private static final String friendsURLPrefix = "http://localhost:8000";
+  private static final String playsURLPrefix = "http://localhost:8001";
+  private static final Gson gson = new Gson();
+  private static Map<String, User> users = new HashMap<>();
 
-  private String getJsonResponse(String url) throws ClientProtocolException, IOException {
+  private String getJsonResponse(final String url) throws ClientProtocolException, IOException {
     CloseableHttpClient httpclient = HttpClients.createDefault();
     HttpGet httpGet = new HttpGet(url);
     CloseableHttpResponse response1 = httpclient.execute(httpGet);
@@ -42,34 +43,32 @@ public class UserService {
     }
   }
 
-  private ServiceResponse getServiceRequest(String url) throws ClientProtocolException, IOException {
+  private ServiceResponse getServiceRequest(final String url) throws ClientProtocolException, IOException {
     String json = getJsonResponse(url);
-    Gson gson = new Gson();
     ServiceResponse response = gson.fromJson(json, ServiceResponse.class);
     return response;
   }
 
-  private ServiceDetailResponse getServiceDetailRequest(String url) throws ClientProtocolException, IOException {
+  private ServiceDetailResponse getServiceDetailRequest(final String url) throws ClientProtocolException, IOException {
     String json = getJsonResponse(url);
-    Gson gson = new Gson();
     ServiceDetailResponse response = gson.fromJson(json, ServiceDetailResponse.class);
     return response;
   }
 
-  public int filterDuplicates(ArrayList<String> list) {
+  public int filterDuplicates(final ArrayList<String> list) {
     Set<String> set = new HashSet<>(list);
     return set.size();
   }
 
-  private void insertUser(String username, ArrayList<String> plays, int friends) {
+  private void insertUser(final String username, final ArrayList<String> plays, final int friends) {
     users.put(username, new User(username, plays, friends, "/users/" + username));
   }
 
-  public User getUser(String username) {
+  public User getUser(final String username) {
     return users.get(username);
   }
 
-  public void handleFriendsService(String username, int friendsCount) {
+  public void handleFriendsService(final String username, final int friendsCount) {
     User u = getUser(username);
     if (u == null) {
       insertUser(username, new ArrayList<String>(), friendsCount);
@@ -87,7 +86,7 @@ public class UserService {
     }
   }
 
-  public void handlePlaysService(String username, ArrayList<String> plays) {
+  public void handlePlaysService(final String username, final ArrayList<String> plays) {
     User u = getUser(username);
     if (u == null) {
       insertUser(username, plays, 0);
@@ -111,7 +110,7 @@ public class UserService {
     return new ServiceResponse(new ArrayList<>(users.values()), "/users");
   }
 
-  public User getUserDetail(String name) throws ClientProtocolException, IOException {
+  public User getUserDetail(final String name) throws ClientProtocolException, IOException {
     User u = getUser(name);
     if (u == null) {
       final String friendsUri = "/friends/" + name;

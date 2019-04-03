@@ -11,7 +11,7 @@ public class User {
   public String uri;
   private transient ArrayList<String> playsData;
 
-  public User(String username, ArrayList<String> plays, int friends, String uri) {
+  public User(final String username, final ArrayList<String> plays, final int friends, final String uri) {
     this.username = username;
     this.plays = plays.size();
     this.friends = friends;
@@ -20,16 +20,16 @@ public class User {
     this.playsData = plays;
   }
 
-  public void setPlays(ArrayList<String> plays) {
+  public void setPlays(final ArrayList<String> plays) {
     this.plays = plays.size();
     this.playsData = plays;
   }
 
-  public void setFriends(int friends) {
+  public void setFriends(final int friends) {
     this.friends = friends;
   }
 
-  public void setTracks(int tracks) {
+  public void setTracks(final int tracks) {
     this.tracks = new Integer(tracks);
   }
 
