@@ -17,7 +17,7 @@ public class UserController {
 
     get("/users/:name", (req, res) -> {
       String name = req.params(":name");
-      User user = userService.getUser(name);
+      User user = userService.getUserDetail(name);
       if (user == null) {
         res.status(404);
         return new ResponseError("No user with name '%s' found", name);
