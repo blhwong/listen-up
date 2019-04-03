@@ -15,6 +15,7 @@ import org.apache.http.client.methods.HttpGet;
 import org.apache.http.impl.client.CloseableHttpClient;
 import org.apache.http.impl.client.HttpClients;
 import org.apache.http.util.EntityUtils;
+import org.omg.CORBA.ServiceDetail;
 
 public class UserService {
 
@@ -22,28 +23,61 @@ public class UserService {
   private final String playsURLPrefix = "http://localhost:8001";
   private Map<String, User> users = new HashMap<>();
 
-
-  private static Response getRequest(String url) throws ClientProtocolException, IOException {
+  private static String getJsonResponse(String url) throws ClientProtocolException, IOException {
+    System.out.println("url " + url);
     CloseableHttpClient httpclient = HttpClients.createDefault();
     HttpGet httpGet = new HttpGet(url);
     CloseableHttpResponse response1 = httpclient.execute(httpGet);
     try {
       HttpEntity entity1 = response1.getEntity();
       String json = EntityUtils.toString(entity1);
-      System.out.println(json);
-      Gson gson = new Gson();
-      Response response = gson.fromJson(json, Response.class);
-      EntityUtils.consume(entity1);
-      return response;
+      return json;
     } finally {
       response1.close();
     }
   }
 
-  public List<User> getAllUsers() throws ClientProtocolException, IOException {
-    Response friendsResponse = getRequest(friendsURLPrefix + "/friends");
-    Response playsResponse = getRequest(playsURLPrefix + "/plays");
-        return new ArrayList<>(users.values());
+  private static ServiceResponse getServiceRequest(String url) throws ClientProtocolException, IOException {
+    String json = getJsonResponse(url);
+    Gson gson = new Gson();
+    ServiceResponse response = gson.fromJson(json, ServiceResponse.class);
+    return response;
+  }
+
+  private static ServiceDetailResponse getServiceDetailRequest(String url) throws ClientProtocolException, IOException {
+    String json = getJsonResponse(url);
+    Gson gson = new Gson();
+    ServiceDetailResponse response = gson.fromJson(json, ServiceDetailResponse.class);
+    return response;
+  }
+
+  public ServiceResponse getAllUsers() throws ClientProtocolException, IOException {
+    ServiceResponse friendsResponse = getServiceRequest(friendsURLPrefix + "/friends");
+    ServiceResponse playsResponse = getServiceRequest(playsURLPrefix + "/plays");
+    for (User i : playsResponse.users) {
+      ServiceDetailResponse playsDetailResponse = getServiceDetailRequest(playsURLPrefix + i.uri);
+      User u = users.get(i.username);
+      if (u == null) {
+        System.out.println("Not found");
+        users.put(i.username, new User(i.username, playsDetailResponse.data.size(), 0, "/users/" + i.username));
+      } else {
+        System.out.println("Found");
+        u.setPlays(playsDetailResponse.data.size());
+      }
+    }
+    for (User i : friendsResponse.users) {
+      ServiceDetailResponse friendsDetailResponse = getServiceDetailRequest(friendsURLPrefix + i.uri);
+      User u = users.get(i.username);
+      if (u == null) {
+        System.out.println("Not found");
+        users.put(i.username, new User(i.username, 0, friendsDetailResponse.data.size(), "/users/" + i.username));
+      } else {
+        System.out.println("Found");
+        u.setFriends(friendsDetailResponse.data.size());
+      }
+    }
+
+    return new ServiceResponse(new ArrayList<>(users.values()), "/users");
   }
 
   public User getUser(String name) {
