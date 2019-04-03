@@ -26,17 +26,17 @@ public class UserService {
   private static Map<String, User> users = new HashMap<>();
 
   private String getJsonResponse(final String url) throws ClientProtocolException, IOException {
-    CloseableHttpClient httpclient = HttpClients.createDefault();
-    HttpGet httpGet = new HttpGet(url);
-    CloseableHttpResponse response1 = httpclient.execute(httpGet);
-    StatusLine sl = response1.getStatusLine();
-    int statusCode = sl.getStatusCode();
+    final CloseableHttpClient httpclient = HttpClients.createDefault();
+    final HttpGet httpGet = new HttpGet(url);
+    final CloseableHttpResponse response1 = httpclient.execute(httpGet);
+    final StatusLine sl = response1.getStatusLine();
+    final int statusCode = sl.getStatusCode();
     if (statusCode == 404) {
       return null;
     }
     try {
-      HttpEntity entity1 = response1.getEntity();
-      String json = EntityUtils.toString(entity1);
+      final HttpEntity entity1 = response1.getEntity();
+      final String json = EntityUtils.toString(entity1);
       return json;
     } finally {
       response1.close();
@@ -44,19 +44,19 @@ public class UserService {
   }
 
   private ServiceResponse getServiceRequest(final String url) throws ClientProtocolException, IOException {
-    String json = getJsonResponse(url);
-    ServiceResponse response = gson.fromJson(json, ServiceResponse.class);
+    final String json = getJsonResponse(url);
+    final ServiceResponse response = gson.fromJson(json, ServiceResponse.class);
     return response;
   }
 
   private ServiceDetailResponse getServiceDetailRequest(final String url) throws ClientProtocolException, IOException {
-    String json = getJsonResponse(url);
-    ServiceDetailResponse response = gson.fromJson(json, ServiceDetailResponse.class);
+    final String json = getJsonResponse(url);
+    final ServiceDetailResponse response = gson.fromJson(json, ServiceDetailResponse.class);
     return response;
   }
 
   public int filterDuplicates(final ArrayList<String> list) {
-    Set<String> set = new HashSet<>(list);
+    final Set<String> set = new HashSet<>(list);
     return set.size();
   }
 
@@ -69,7 +69,7 @@ public class UserService {
   }
 
   public void handleFriendsService(final String username, final int friendsCount) {
-    User u = getUser(username);
+    final User u = getUser(username);
     if (u == null) {
       insertUser(username, new ArrayList<String>(), friendsCount);
     } else {
@@ -78,16 +78,16 @@ public class UserService {
   }
 
   private void getFriendsService() throws ClientProtocolException, IOException {
-    ServiceResponse friendsResponse = getServiceRequest(friendsURLPrefix + "/friends");
+    final ServiceResponse friendsResponse = getServiceRequest(friendsURLPrefix + "/friends");
     for (User i : friendsResponse.users) {
       final String uri = "/friends/" + i.username;
-      ServiceDetailResponse friendsDetailResponse = getServiceDetailRequest(friendsURLPrefix + uri);
+      final ServiceDetailResponse friendsDetailResponse = getServiceDetailRequest(friendsURLPrefix + uri);
       handleFriendsService(i.username, friendsDetailResponse.data.size());
     }
   }
 
   public void handlePlaysService(final String username, final ArrayList<String> plays) {
-    User u = getUser(username);
+    final User u = getUser(username);
     if (u == null) {
       insertUser(username, plays, 0);
     } else {
@@ -96,10 +96,10 @@ public class UserService {
   }
 
   private void getPlaysService() throws ClientProtocolException, IOException {
-    ServiceResponse playsResponse = getServiceRequest(playsURLPrefix + "/plays");
+    final ServiceResponse playsResponse = getServiceRequest(playsURLPrefix + "/plays");
     for (User i : playsResponse.users) {
       final String uri = "/plays/" + i.username;
-      ServiceDetailResponse playsDetailResponse = getServiceDetailRequest(playsURLPrefix + uri);
+      final ServiceDetailResponse playsDetailResponse = getServiceDetailRequest(playsURLPrefix + uri);
       handlePlaysService(i.username, playsDetailResponse.data);
     }
   }
@@ -115,8 +115,8 @@ public class UserService {
     if (u == null) {
       final String friendsUri = "/friends/" + name;
       final String playsUri = "/plays/" + name;
-      ServiceDetailResponse friendsDetailResponse = getServiceDetailRequest(friendsURLPrefix + friendsUri);
-      ServiceDetailResponse playsDetailResponse = getServiceDetailRequest(playsURLPrefix + playsUri);
+      final ServiceDetailResponse friendsDetailResponse = getServiceDetailRequest(friendsURLPrefix + friendsUri);
+      final ServiceDetailResponse playsDetailResponse = getServiceDetailRequest(playsURLPrefix + playsUri);
       if (friendsDetailResponse == null || playsDetailResponse == null) {
         return null;
       }
@@ -124,8 +124,8 @@ public class UserService {
       handlePlaysService(name, playsDetailResponse.data);
       u = getUser(name);
     }
-    ArrayList<String> plays = u.getPlaysData();
-    int tracks = filterDuplicates(plays);
+    final ArrayList<String> plays = u.getPlaysData();
+    final int tracks = filterDuplicates(plays);
     u.setTracks(tracks);
     return u;
   }
