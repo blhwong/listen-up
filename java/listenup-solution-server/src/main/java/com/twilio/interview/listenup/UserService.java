@@ -4,7 +4,6 @@ import java.io.IOException;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.HashSet;
-import java.util.List;
 import java.util.Map;
 import java.util.Set;
 
@@ -17,7 +16,6 @@ import org.apache.http.client.methods.HttpGet;
 import org.apache.http.impl.client.CloseableHttpClient;
 import org.apache.http.impl.client.HttpClients;
 import org.apache.http.util.EntityUtils;
-import org.omg.CORBA.ServiceDetail;
 
 public class UserService {
 
@@ -52,33 +50,53 @@ public class UserService {
     return response;
   }
 
-  public ServiceResponse getAllUsers() throws ClientProtocolException, IOException {
+  private static int filterDuplicates(ArrayList<String> list) {
+    Set<String> set = new HashSet<>(list);
+    return set.size();
+  }
+
+  private void getFriendsService() throws ClientProtocolException, IOException {
     ServiceResponse friendsResponse = getServiceRequest(friendsURLPrefix + "/friends");
-    ServiceResponse playsResponse = getServiceRequest(playsURLPrefix + "/plays");
-    for (User i : playsResponse.users) {
-      ServiceDetailResponse playsDetailResponse = getServiceDetailRequest(playsURLPrefix + i.uri);
-      User u = users.get(i.username);
-      Set<String> set = new HashSet<>(playsDetailResponse.data);
-      if (u == null) {
-        users.put(i.username, new User(i.username, set.size(), 0, "/users/" + i.username));
-      } else {
-        u.setPlays(set.size());
-      }
-    }
     for (User i : friendsResponse.users) {
       ServiceDetailResponse friendsDetailResponse = getServiceDetailRequest(friendsURLPrefix + i.uri);
       User u = users.get(i.username);
       if (u == null) {
-        users.put(i.username, new User(i.username, 0, friendsDetailResponse.data.size(), "/users/" + i.username));
+        users.put(i.username, new User(i.username, new ArrayList<String>(), friendsDetailResponse.data.size(), "/users/" + i.username));
       } else {
         u.setFriends(friendsDetailResponse.data.size());
       }
     }
+  }
 
+  private void getPlaysService() throws ClientProtocolException, IOException {
+    ServiceResponse playsResponse = getServiceRequest(playsURLPrefix + "/plays");
+    for (User i : playsResponse.users) {
+      ServiceDetailResponse playsDetailResponse = getServiceDetailRequest(playsURLPrefix + i.uri);
+      User u = users.get(i.username);
+      if (u == null) {
+        users.put(i.username, new User(i.username, playsDetailResponse.data, 0, "/users/" + i.username));
+      } else {
+        u.setPlays(playsDetailResponse.data);
+      }
+    }
+  }
+
+  public ServiceResponse getAllUsers() throws ClientProtocolException, IOException {
+    getFriendsService();
+    getPlaysService();
     return new ServiceResponse(new ArrayList<>(users.values()), "/users");
   }
 
-  public User getUser(String name) {
-    return users.get(name);
+  public User getUser(String name) throws ClientProtocolException, IOException {
+    User u = users.get(name);
+    if (u == null) {
+      getFriendsService();
+      getPlaysService();
+      u = users.get(name);
+    }
+    ArrayList<String> plays = u.getPlaysData();
+    int tracks = filterDuplicates(plays);
+    u.setTracks(tracks);
+    return u;
   }
 }
