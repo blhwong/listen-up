@@ -2,6 +2,11 @@ package com.twilio.interview.listenup;
 
 import static spark.Spark.get;
 import static spark.Spark.port;
+
+import java.io.IOException;
+
+import org.apache.http.client.ClientProtocolException;
+
 import static spark.Spark.after;
 import static spark.Spark.exception;
 
@@ -20,7 +25,7 @@ public class UserController {
       User user = userService.getUserDetail(name);
       if (user == null) {
         res.status(404);
-        return new ResponseError("No user with name '%s' found", name);
+        return new ResponseError("No user with name %s found", name);
       }
       return user;
     }, json());
@@ -31,6 +36,19 @@ public class UserController {
 
     exception(IllegalArgumentException.class, (err, req, res) -> {
       res.status(400);
+      res.type("application/json");
+      res.body(toJson(new ResponseError(err)));
+    });
+
+    exception(ClientProtocolException.class, (err, req, res) -> {
+      res.status(500);
+      res.type("application/json");
+      res.body(toJson(new ResponseError(err)));
+    });
+
+    exception(IOException.class, (err, req, res) -> {
+      res.status(500);
+      res.type("application/json");
       res.body(toJson(new ResponseError(err)));
     });
   }

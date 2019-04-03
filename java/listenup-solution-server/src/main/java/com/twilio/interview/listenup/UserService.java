@@ -10,6 +10,7 @@ import java.util.Set;
 import com.google.gson.Gson;
 
 import org.apache.http.HttpEntity;
+import org.apache.http.StatusLine;
 import org.apache.http.client.ClientProtocolException;
 import org.apache.http.client.methods.CloseableHttpResponse;
 import org.apache.http.client.methods.HttpGet;
@@ -27,6 +28,11 @@ public class UserService {
     CloseableHttpClient httpclient = HttpClients.createDefault();
     HttpGet httpGet = new HttpGet(url);
     CloseableHttpResponse response1 = httpclient.execute(httpGet);
+    StatusLine sl = response1.getStatusLine();
+    int statusCode = sl.getStatusCode();
+    if (statusCode == 404) {
+      return null;
+    }
     try {
       HttpEntity entity1 = response1.getEntity();
       String json = EntityUtils.toString(entity1);
@@ -112,6 +118,9 @@ public class UserService {
       final String playsUri = "/plays/" + name;
       ServiceDetailResponse friendsDetailResponse = getServiceDetailRequest(friendsURLPrefix + friendsUri);
       ServiceDetailResponse playsDetailResponse = getServiceDetailRequest(playsURLPrefix + playsUri);
+      if (friendsDetailResponse == null || playsDetailResponse == null) {
+        return null;
+      }
       handleFriendsService(name, friendsDetailResponse.data.size());
       handlePlaysService(name, playsDetailResponse.data);
       u = getUser(name);
