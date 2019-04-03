@@ -26,7 +26,7 @@ public class UserServiceTest {
 
   @Test
   public void canFilterDuplicates() {
-    ArrayList<String> list = new ArrayList<String>(
+    final ArrayList<String> list = new ArrayList<String>(
       Arrays.asList("ABC", "ABC", "DEF", "DEF", "HIJ")
     );
     int count = service.filterDuplicates(list);
@@ -38,8 +38,8 @@ public class UserServiceTest {
 
   @Test
   public void canHandlePlaysService() {
-    String username = "brandon_wong";
-    ArrayList<String> plays = new ArrayList<String>(
+    final String username = "brandon_wong";
+    final ArrayList<String> plays = new ArrayList<String>(
       Arrays.asList("song1", "song1", "song1", "song2")
     );
     service.handlePlaysService(username, plays);
@@ -55,8 +55,8 @@ public class UserServiceTest {
 
   @Test
   public void canHandleFriendsService() {
-    String username = "test_test";
-    int friendsCount = 10;
+    final String username = "test_test";
+    final int friendsCount = 10;
     service.handleFriendsService(username, friendsCount);
     User u = service.getUser(username);
     assertEquals(u.username, username);
@@ -69,16 +69,16 @@ public class UserServiceTest {
 
   @Test
   public void canGetUserDetailIfPopulated() {
-    String username = "populated_user";
-    int friendsCount = 15;
-    ArrayList<String> plays = new ArrayList<String>(
+    final String username = "populated_user";
+    final int friendsCount = 15;
+    final ArrayList<String> plays = new ArrayList<String>(
       Arrays.asList("song1", "song1", "song1", "song2", "song3")
     );
     service.handleFriendsService(username, friendsCount);
     service.handlePlaysService(username, plays);
 
     try {
-      User u = service.getUserDetail(username);
+      final User u = service.getUserDetail(username);
       assertEquals(u.username, username);
       assertEquals(u.friends, friendsCount);
       assertEquals(u.plays, plays.size());
