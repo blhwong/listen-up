@@ -20,10 +20,10 @@ import org.apache.http.util.EntityUtils;
 
 public class UserService {
 
-  private static final String friendsURLPrefix = "http://localhost:8000";
-  private static final String playsURLPrefix = "http://localhost:8001";
-  private static final Gson gson = new Gson();
-  private static Map<String, User> users = new HashMap<>();
+  private static final String FRIENDS_URL_PREFIX = "http://localhost:8000";
+  private static final String PLAYS_URL_PREFIX = "http://localhost:8001";
+  private static final Gson GSON = new Gson();
+  private static final Map<String, User> users = new HashMap<>();
 
   private String getJsonResponse(final String url) throws ClientProtocolException, IOException {
     final CloseableHttpClient httpclient = HttpClients.createDefault();
@@ -45,13 +45,13 @@ public class UserService {
 
   private ServiceResponse getServiceRequest(final String url) throws ClientProtocolException, IOException {
     final String json = getJsonResponse(url);
-    final ServiceResponse response = gson.fromJson(json, ServiceResponse.class);
+    final ServiceResponse response = GSON.fromJson(json, ServiceResponse.class);
     return response;
   }
 
   private ServiceDetailResponse getServiceDetailRequest(final String url) throws ClientProtocolException, IOException {
     final String json = getJsonResponse(url);
-    final ServiceDetailResponse response = gson.fromJson(json, ServiceDetailResponse.class);
+    final ServiceDetailResponse response = GSON.fromJson(json, ServiceDetailResponse.class);
     return response;
   }
 
@@ -78,10 +78,10 @@ public class UserService {
   }
 
   private void getFriendsService() throws ClientProtocolException, IOException {
-    final ServiceResponse friendsResponse = getServiceRequest(friendsURLPrefix + "/friends");
+    final ServiceResponse friendsResponse = getServiceRequest(FRIENDS_URL_PREFIX + "/friends");
     for (User i : friendsResponse.users) {
       final String uri = "/friends/" + i.username;
-      final ServiceDetailResponse friendsDetailResponse = getServiceDetailRequest(friendsURLPrefix + uri);
+      final ServiceDetailResponse friendsDetailResponse = getServiceDetailRequest(FRIENDS_URL_PREFIX + uri);
       handleFriendsService(i.username, friendsDetailResponse.data.size());
     }
   }
@@ -96,10 +96,10 @@ public class UserService {
   }
 
   private void getPlaysService() throws ClientProtocolException, IOException {
-    final ServiceResponse playsResponse = getServiceRequest(playsURLPrefix + "/plays");
+    final ServiceResponse playsResponse = getServiceRequest(PLAYS_URL_PREFIX + "/plays");
     for (User i : playsResponse.users) {
       final String uri = "/plays/" + i.username;
-      final ServiceDetailResponse playsDetailResponse = getServiceDetailRequest(playsURLPrefix + uri);
+      final ServiceDetailResponse playsDetailResponse = getServiceDetailRequest(PLAYS_URL_PREFIX + uri);
       handlePlaysService(i.username, playsDetailResponse.data);
     }
   }
@@ -115,8 +115,8 @@ public class UserService {
     if (u == null) {
       final String friendsUri = "/friends/" + name;
       final String playsUri = "/plays/" + name;
-      final ServiceDetailResponse friendsDetailResponse = getServiceDetailRequest(friendsURLPrefix + friendsUri);
-      final ServiceDetailResponse playsDetailResponse = getServiceDetailRequest(playsURLPrefix + playsUri);
+      final ServiceDetailResponse friendsDetailResponse = getServiceDetailRequest(FRIENDS_URL_PREFIX + friendsUri);
+      final ServiceDetailResponse playsDetailResponse = getServiceDetailRequest(PLAYS_URL_PREFIX + playsUri);
       if (friendsDetailResponse == null || playsDetailResponse == null) {
         return null;
       }
